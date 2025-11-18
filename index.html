@@ -104,7 +104,7 @@
             const hours12 = hours24 % 12 || 12; // 12時間制
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
-            document.getElementById("current-time").textContent = `${hours24}:${minutes}:${seconds}`;
+            document.getElementById("current-time").textContent = `${hours24}:${padZero(minutes)}:${padZero(seconds)}`;
 
             // 数字の和を計算 (時間と分のみ)
             const sum12Hour = calculateDigitSum(hours12, minutes);
@@ -152,7 +152,7 @@
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                    <td>${futureHours24}:${futureMinutes}</td>
+                    <td>${futureHours24}:${padZero(futureMinutes)}</td>
                     <td class="${getColorClass(sum12Hour)}">${sum12Hour}</td>
                     <td class="${getColorClass(sum24Hour)}">${sum24Hour}</td>
                 `;
@@ -164,6 +164,11 @@
         function getColorClass(sum) {
             const specialValues = [9, 10, 12, 14, 19, 20];
             return specialValues.includes(sum) ? "red" : "blue";
+        }
+
+        // 一桁の数字にゼロを追加する関数
+        function padZero(number) {
+            return number < 10 ? `0${number}` : number;
         }
 
         // 毎秒更新
