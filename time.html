@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>現在時刻と数字の和</title>
+    <style>
+        /* モダンなスタイル */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin: 5px 0;
+        }
+
+        .red {
+            color: #e74c3c; /* 赤色 */
+            font-weight: bold;
+        }
+
+        .blue {
+            color: #3498db; /* 青色 */
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="time-display">
+            <h2>現在時刻 (秒単位で更新):</h2>
+            <p id="current-time"></p>
+            <h2>現在時刻の数字の和:</h2>
+            <p>12時間制: <span id="sum-12-hour"></span></p>
+            <p>24時間制: <span id="sum-24-hour"></span></p>
+        </div>
+        <div class="future-times">
+            <h2>以降の5分間の数字の和:</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>時刻 (24時間制)</th>
+                        <th>12時間制の数字の和</th>
+                        <th>24時間制の数字の和</th>
+                    </tr>
+                </thead>
+                <tbody id="future-times-table">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 現在時刻を表示し、数字の和を計算する関数
+        function updateTime() {
+            const now = new Date();
+
+            // 現在時刻を秒単位で表示
+            const hours24 = now.getHours();
+            const hours12 = hours24 % 12 || 12; // 12時間制
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            document.getElementById("current-time").textContent = `${hours24}:${minutes}:${seconds}`;
+
+            // 数字の和を計算 (時間と分のみ)
+            const sum12Hour = calculateDigitSum(hours12, minutes);
+            const sum24Hour = calculateDigitSum(hours24, minutes);
+
+            // 数字の和を表示 (色分け)
+            displaySumWithColor(document.getElementById("sum-12-hour"), sum12Hour);
+            displaySumWithColor(document.getElementById("sum-24-hour"), sum24Hour);
+
+            // 以降の5分間の数字の和を表示
+            displayFutureTimes(now);
+        }
+
+        // 数字の和を計算する関数 (時間と分のみ)
+        function calculateDigitSum(hours, minutes) {
+            const digits = [...String(hours), ...String(minutes)];
+            return digits.reduce((sum, digit) => sum + parseInt(digit), 0);
+        }
+
+        // 数字の和を表示する関数 (色分け)
+        function displaySumWithColor(element, sum) {
+            const specialValues = [9, 10, 12, 14, 19, 20];
+            if (specialValues.includes(sum)) {
+                element.textContent = sum;
+                element.className = "red";
+            } else {
+                element.textContent = sum;
+                element.className = "blue";
+            }
+        }
+
+        // 以降の5分間の数字の和を表示する関数 (表形式)
+        function displayFutureTimes(currentTime) {
+            const futureTimesTable = document.getElementById("future-times-table");
+            futureTimesTable.innerHTML = ""; // 初期化
+
+            for (let i = 1; i <= 5; i++) {
+                const futureTime = new Date(currentTime.getTime() + i * 60 * 1000); // i分後
+                const futureHours24 = futureTime.getHours();
+                const futureHours12 = futureHours24 % 12 || 12; // 12時間制
+                const futureMinutes = futureTime.getMinutes();
+
+                const sum12Hour = calculateDigitSum(futureHours12, futureMinutes);
+                const sum24Hour = calculateDigitSum(futureHours24, futureMinutes);
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${futureHours24}:${futureMinutes}</td>
+                    <td class="${getColorClass(sum12Hour)}">${sum12Hour}</td>
+                    <td class="${getColorClass(sum24Hour)}">${sum24Hour}</td>
+                `;
+                futureTimesTable.appendChild(row);
+            }
+        }
+
+        // 数字の和に応じて色クラスを返す関数
+        function getColorClass(sum) {
+            const specialValues = [9, 10, 12, 14, 19, 20];
+            return specialValues.includes(sum) ? "red" : "blue";
+        }
+
+        // 毎秒更新
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
